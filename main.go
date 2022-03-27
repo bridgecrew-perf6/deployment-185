@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"os"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -12,7 +14,15 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
+var chainId = 269
+
 func main() {
+	if len(os.Args) == 2 {
+		chainId, _ = strconv.Atoi(os.Args[1])
+	}
+
+	fmt.Println("chain id ", chainId)
+
 	signerKey, _ := crypto.GenerateKey()
 	key, _ := crypto.GenerateKey()
 
@@ -27,6 +37,9 @@ func main() {
 	tx := types.NewTransaction(0, common.Address{},
 		big.NewInt(0), 100000, big.NewInt(100000000000),
 		common.Hex2Bytes("604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3"))
+
+	singer := types.NewEIP155Signer(big.NewInt(int64(chainId)))
+	tx, _ = types.SignTx(tx, singer, signerKey)
 
 	txByte, _ := rlp.EncodeToBytes(tx)
 
